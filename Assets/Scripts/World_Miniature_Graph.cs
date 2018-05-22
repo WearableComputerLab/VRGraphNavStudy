@@ -78,7 +78,7 @@ public class World_Miniature_Graph : MonoBehaviour {
         // if the miniature has been created, and the user is rotating the graph
         //if (createdMiniature && controller2.GetPress(SteamVR_Controller.ButtonMask.Grip)) {
         if (miniature != null) {
-			graph.transform.rotation = miniature.transform.rotation;
+			//graph.transform.rotation = miniature.transform.rotation;
         }
         //}
         CalculateWMVectors();
@@ -97,5 +97,9 @@ public class World_Miniature_Graph : MonoBehaviour {
 
 	public Vector3 returnWIMWorldOrigin(){
 		return origin.position;
+	}
+
+	public Transform getMiniature(){
+		return miniature.transform;
 	}
 }

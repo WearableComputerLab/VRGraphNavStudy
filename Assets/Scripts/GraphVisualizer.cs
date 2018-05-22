@@ -11,8 +11,6 @@ public class GraphVisualizer : MonoBehaviour {
 
 	[Header("Study Datasets")]
 	public TextAsset[] LargeGraphDatasets;
-	public TextAsset[] FeatureGraphDatasets;
-
 
 	[Header("Graph Type and Variables")]
 	public TextAsset dataset;
@@ -67,11 +65,12 @@ public class GraphVisualizer : MonoBehaviour {
     // For edge generation:
     // Vertices to link between nodes
     HashSet<EdgeLink> HashEdges = new HashSet<EdgeLink>();
-    public float tubeWidth = 0.10f;
+    private float tubeWidth = 0.10f;
 
     // Radius of the graph overall
     public int clusterRadius = 50;
-    public int overallRadius = 50;
+	[Header("Advanced Layout Options")]
+    public float overallRadius = 50;
     public Vector3 axisScale = new Vector3(1,3,1);
 
     //Debugging Variables; to be removed later
@@ -81,8 +80,8 @@ public class GraphVisualizer : MonoBehaviour {
     private bool clusterAllNodes = false;
     public static bool graph_layout_recognized = false;
     private bool isLoadingLayout = false;
-    private bool runColombs = false;
-    private float columbsTime = 0;
+    private bool runColombs = true;
+	public float columbsTime = 0;
 
     // graph layout count
     public static int layout_edges = 0;
@@ -93,9 +92,13 @@ public class GraphVisualizer : MonoBehaviour {
     private Startup_Controller startup;
     private string graphData = "";
     private string attributeData = "";
+	public int edgeForce = 400;
 
     // Use this for initialization
     void Awake () {
+
+		dataset = LargeGraphDatasets [UnityEngine.Random.Range (0, LargeGraphDatasets.Length)];
+
         // layout variables
         double f = 1.500;
         int x_d = (int)((f - (int)f)*100);
@@ -259,7 +262,7 @@ public class GraphVisualizer : MonoBehaviour {
         }
 		EdgeManager edgeManager = Camera.main.GetComponent<EdgeManager> ();
 		ArrayList glEdges = edgeManager.getEdges();
-		print (glEdges.Count + "glEdge count");
+//		print (glEdges.Count + "glEdge count");
 		for(int i = 0; i < glEdges.Count; i ++) {
 			Edge e = (Edge)glEdges[i];
 			e.setColor(e.getTransformRef().parent.parent.GetComponent<MeshRenderer>().material.color);
@@ -281,9 +284,9 @@ public class GraphVisualizer : MonoBehaviour {
             
         }
         if (runColombs && !graph_layout_recognized && isLoadingLayout == false) {
-           columbsTime += Time.deltaTime;
+           columbsTime += Time.deltaTime;		 
            ApplyColombsLaw();
-           if(columbsTime > 0.1f) {
+           if(columbsTime > 10) {
                 runColombs = false;
                 if (TypeGraph == GraphType.Circles) {
                     CombineMeshes();
@@ -490,15 +493,16 @@ public class GraphVisualizer : MonoBehaviour {
         nodePositions = new Vector3[count];
         springNodes = new Rigidbody[count];
         // loop through nodePositions and generate vectors
-        for(int i = 0; i < count; ++i) {
-            float x = transform.position.x;
-            float y = transform.position.y;
-            float z = transform.position.z;
+		for (int i = 0; i < count; ++i) {
+			float x = transform.position.x;
+			float y = transform.position.y;
+			float z = transform.position.z;
             
-            nodePositions[i] = new Vector3(x + UnityEngine.Random.Range(-overallRadius*axisScale.x, overallRadius*axisScale.x),y + UnityEngine.Random.Range(-overallRadius*axisScale.y, overallRadius*axisScale.y), z + UnityEngine.Random.Range(-overallRadius*axisScale.z, overallRadius*axisScale.z));
-
-        }
-
+			nodePositions [i] =
+				new Vector3(x + UnityEngine.Random.Range(-overallRadius*axisScale.x, overallRadius*axisScale.x),
+										   y + UnityEngine.Random.Range(-overallRadius*axisScale.y, overallRadius*axisScale.y),
+										   z + UnityEngine.Random.Range(-overallRadius*axisScale.z, overallRadius*axisScale.z));
+		}
         // Go through each node create a VisualNode
         while(index < count) {
             Node nodebeingadded = (Node)graph.nodes[index];
@@ -740,14 +744,14 @@ public class GraphVisualizer : MonoBehaviour {
                     var Body2 = g2.GetComponent<Rigidbody>();
 
                     Vector3 d = Body1.position - Body2.position;
-                    float distance = d.magnitude + 0.001f;
+                    float distance = d.magnitude/10 + 0.001f;
                     Vector3 direction = d.normalized;
 
-                    if (distance < 5) {
-                        var force = (direction * 0.005f) / (distance * distance * 0.1f);
-                        Body1.AddForce(force * 0.1f);
+                        var force = (direction) / (distance * distance * 1000);
+                        Body1.AddForce(force * 0.05f);
                         Body2.AddForce(-force * 0.05f);
-                    }
+
+
                 }
             }
         }
@@ -970,6 +974,7 @@ public class GraphVisualizer : MonoBehaviour {
 
                 if (nodes_already_clustered.Contains(v) == false) {
                     GameObject g = v.gameObject;
+
                     meshFilters[k] = g.GetComponent<MeshFilter>();
                     combine[k].mesh = meshFilters[k].sharedMesh;
                     combine[k].transform = meshFilters[k].transform.localToWorldMatrix;

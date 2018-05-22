@@ -11,9 +11,9 @@ public class DynamicEdge : MonoBehaviour {
 
     // for physics displacement
     public Rigidbody r1, r2;
-    public float Length = 2f;
+    public float Length = 0.01f;
     public float EdgeLength;
-    public float SpringK = 12.2f;
+    public float SpringK = 1.2f;
     public Vector3 force, force2;
     public float force_ns, acting_force;
     public int exe_force = 0;
@@ -25,6 +25,7 @@ public class DynamicEdge : MonoBehaviour {
     public Color def_color;
     float tint_alpha;
 	private EdgeManager edgeManager;
+	private GraphVisualizer graph;
 
     private void Awake() {
         if (edgeType == EdgeType.NormalRig) {
@@ -37,6 +38,7 @@ public class DynamicEdge : MonoBehaviour {
             anchor2 = transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0);
         }
 		edgeManager = Camera.main.GetComponent<EdgeManager>();
+		graph = FindObjectOfType<GraphVisualizer>();
     }
     private void Start() {
         if (edgeType != EdgeType.LineRenderer) {
@@ -68,9 +70,6 @@ public class DynamicEdge : MonoBehaviour {
 
 
     private void FixedUpdate() {
-
-
-
         if (stopTimeCheck == false && GraphVisualizer.graph_layout_recognized == false) {
             if (GraphVisualizer.graph_layout_recognized) {
                 stopTimeCheck = true;
@@ -80,10 +79,10 @@ public class DynamicEdge : MonoBehaviour {
             force_ns = Mathf.Abs(force.magnitude + force2.magnitude);
             EdgeLength = Vector3.Distance(anchor1.position, anchor2.position);
             // stop spring graph when force is < 0.03f
-            if (exe_force == 1 && Time.timeSinceLevelLoad > 10 && EdgeLength < 1f) {
-                stopTimeCheck = true;
-                GraphVisualizer.layout_edges++;
-                exe_force = 0;
+			if (exe_force == 1){// && EdgeLength < 1f) {
+                //stopTimeCheck = true;
+                //GraphVisualizer.layout_edges++;
+                //exe_force = 0;
             }
             if (r1 != null && r2 != null && stopTimeCheck == false && GraphVisualizer.graph_layout_recognized == false) {
                 ApplyHookesLaw();
@@ -112,13 +111,12 @@ public class DynamicEdge : MonoBehaviour {
     private void ApplyHookesLaw() {
         exe_force = 1;
         Vector3 d = r2.transform.position - r1.transform.position;
-        float displacement = Length - d.magnitude;
-
+        float displacement = 1 - d.magnitude;
         Vector3 dir = d.normalized;
-        force = SpringK * dir * displacement * -Length;
-        force2 = SpringK * dir * displacement * Length;
-        r1.AddForce((force / adjCount1) * (Time.deltaTime * 200));
-        r2.AddForce((force2 / adjCount2) * (Time.deltaTime * 200));
+		Vector3 forceA = 1 * dir * displacement * -0.1f;
+		Vector3 forceB = 1 * dir * displacement * 0.1f;
+		r1.AddForce(forceA * (graph.edgeForce * Time.deltaTime));
+		r2.AddForce(forceB * (graph.edgeForce * Time.deltaTime));
     }
 
     private void PolarCoord() {
