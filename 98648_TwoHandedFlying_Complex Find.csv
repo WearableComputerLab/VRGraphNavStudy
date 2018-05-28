@@ -1,0 +1,16 @@
+Time,Real Position
+Time,Real Rotation
+Time,Real Velocity
+Time,Real Angular Velocity
+Time,Simulated Movement
+Time,Simulated Velocity
+Time,Left Controller Position
+Time,Left Controller Rotation
+Time,Left Controller Velocity
+Time,Left Controller Angular Velocity
+Time,Right Controller Position
+Time,Right Controller Rotation
+Time,Right Controller Velocity
+Time,Right Controller Angular Velocity
+Task,Time Taken
+0,1

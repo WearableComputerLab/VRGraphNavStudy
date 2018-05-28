@@ -49,6 +49,7 @@ public class LaserPointer : MonoBehaviour {
     // 
     public int studyState = 0;
     private Vector2 q;
+	private Transform nodeParent;
     public VignetteAndChromaticAberration comfortZoomVignette;
     private SteamVR_Controller.Device Controller {
         get { return SteamVR_Controller.Input((int)trackedObj.index); }
@@ -254,6 +255,9 @@ public class LaserPointer : MonoBehaviour {
             //graph.transform.rotation = Quaternion.Lerp(graph.transform.rotation, rotateGraphTo, 0.01f);
             pulling = false;
 			if(mini != null) {
+				if(nodeParent != null){
+					mini.transform.parent = nodeParent;
+				}
 				mini.setMoving(false);
 			}
         }
@@ -321,7 +325,7 @@ public class LaserPointer : MonoBehaviour {
                 Vector3 new_rot = new Vector3(0, 0, v_rot.z);
                 //node.transform.localRotation *= Quaternion.Euler(new_rot);
 
-				node.transform.position = transform.position;
+				node.transform.parent = transform;
 				//Camera.main.transform.parent.localPosition += Controller.velocity * 0.1f;
             } else {
                 if(mini != null) {
@@ -422,6 +426,7 @@ public class LaserPointer : MonoBehaviour {
     void OnCollisionStay(Collision other) {
         if (node == null) {
             node = other.transform;
+			nodeParent = other.transform.parent;
             pickedUpNodePos = node.transform.position;
             print(node);
         } 
@@ -465,6 +470,7 @@ public class LaserPointer : MonoBehaviour {
         if (other.tag == "NavigationCamera")
         {
             node = other.transform.parent;
+			nodeParent = other.transform.parent.parent;
         }
 
         if (node == null && other.tag != "SaveButton" && userStudyRunning == false)

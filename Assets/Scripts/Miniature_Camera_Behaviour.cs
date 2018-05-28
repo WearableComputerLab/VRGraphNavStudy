@@ -15,21 +15,16 @@ public class Miniature_Camera_Behaviour : MonoBehaviour {
     public bool stopStudyNode = false;
 	private Quaternion camera_Quaternion;
 
-	private Transform worldCamera;
-	private Transform miniature;
-	public Transform worldGraphCenter;
+	private Transform primitiveTest;
 
 	private void Awake(){
-		worldCamera = Camera.main.transform;
+		//7G/ameObject g = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+		//g.transform.localScale = new Vector3 (0.1f, 0.1f, 0.1f);
+		//primitiveTest = g.transform;
 	}
 
     // Update is called once per frame
     void Update () {
-
-		// get miniature and assign if it is not null
-		if (wim.getMiniature () != null) {
-			miniature = wim.getMiniature ();
-		}
 
         if (!Moving) {
 			camera_Quaternion = transform.rotation;
@@ -46,13 +41,11 @@ public class Miniature_Camera_Behaviour : MonoBehaviour {
             gameObject.layer = 5;
 			Quaternion lookatCamera = Quaternion.LookRotation (transform.position - Camera.main.transform.position);
 			transform.rotation = lookatCamera;
-			if (power.ActiveQuery && miniature != null) {
-				Vector3 delta = (miniature.transform.position - transform.position);
-				delta = transform.InverseTransformVector(delta);
-				Vector3 wimForward = miniature.transform.TransformDirection(Vector3.forward);
-				wimForward = transform.InverseTransformDirection(wimForward);
-				graph.transform.position = worldCamera.position + worldCamera.TransformVector(delta);
-				graph.transform.forward = wimForward;
+            if (power.ActiveQuery) {
+                float y_rot = graph.transform.rotation.eulerAngles.y;
+				Vector3 dir = transform.position - wim.returnWIMWorldOrigin ();
+				Camera.main.transform.parent.position = (dir)*14;
+				//primitiveTest.position = (dir)*15;
                 WIMBlur.SetActive(true);
             } else
             {

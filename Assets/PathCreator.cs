@@ -15,7 +15,6 @@ public class PathCreator : MonoBehaviour {
 	private VisualNode v1, v2;
 	private GameObject g1;
 
-
 	// Use this for initialization
 	void Start () {
 		graph = FindObjectOfType<GraphVisualizer> ();

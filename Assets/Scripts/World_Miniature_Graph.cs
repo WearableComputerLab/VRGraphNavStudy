@@ -17,6 +17,11 @@ public class World_Miniature_Graph : MonoBehaviour {
     public Vector3 C;
     public Vector3 Cm;
 	private Transform origin;
+	private Miniature_Camera_Behaviour miniCam;
+
+	private void Awake(){
+		miniCam = FindObjectOfType<Miniature_Camera_Behaviour>();
+	}
 
 	// Update is called once per frame
 	private void Update () {
@@ -26,7 +31,7 @@ public class World_Miniature_Graph : MonoBehaviour {
         vr_device = SteamVR_Controller.Input((int)tracker.index);
      //   if(vr_device.angularVelocity.y > 0.02f) { 
             transform.rotation = Quaternion.Lerp(transform.rotation, tracker.transform.rotation, 20 * Time.deltaTime);
-            transform.position = tracker.transform.position + tracker.transform.forward * 0.2f;
+            transform.position = tracker.transform.position +  tracker.transform.forward * 0.2f;
             transform.GetChild(2).LookAt(Camera.main.transform);
      //   }
 		y_angular_velocity = vr_device.angularVelocity.y;
@@ -70,6 +75,9 @@ public class World_Miniature_Graph : MonoBehaviour {
 					miniStudyNodes [k].transform.parent = miniature.transform;
 				}
 			}
+			// identify study node and make parent of WIM
+			WIMNode wimNode = GetComponentInChildren<WIMNode>();
+			wimNode.transform.parent = miniature.transform;
             miniature.transform.localRotation = Quaternion.Euler(new Vector3(0, -90, -90));
             miniature.transform.localScale = new Vector3(0.07f, 0.07f, 0.07f);
             createdMiniature = true;
@@ -77,8 +85,8 @@ public class World_Miniature_Graph : MonoBehaviour {
 
         // if the miniature has been created, and the user is rotating the graph
         //if (createdMiniature && controller2.GetPress(SteamVR_Controller.ButtonMask.Grip)) {
-        if (miniature != null) {
-			//graph.transform.rotation = miniature.transform.rotation;
+        if (miniature != null && miniCam.Moving) {
+			graph.transform.rotation = miniature.transform.rotation;
         }
         //}
         CalculateWMVectors();
@@ -97,9 +105,5 @@ public class World_Miniature_Graph : MonoBehaviour {
 
 	public Vector3 returnWIMWorldOrigin(){
 		return origin.position;
-	}
-
-	public Transform getMiniature(){
-		return miniature.transform;
 	}
 }
